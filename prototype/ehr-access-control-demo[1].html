@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EHR Access Control | Initial Prototype</title>
+<style>
+:root{--ink:#183044;--muted:#617386;--line:#dce5e9;--teal:#087f83;--paper:#f4f7f8}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Segoe UI,Arial,sans-serif;font-size:16px;line-height:1.5}button,select,input{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #ddad36;outline-offset:3px}header{background:#173347;color:white;padding:26px 36px}header .top{display:flex;justify-content:space-between;gap:20px;align-items:center;max-width:1360px;margin:auto}.tag{background:#244a5c;border:1px solid #53727e;border-radius:30px;padding:6px 13px;font-size:12px;letter-spacing:.08em}h1{font-size:29px;line-height:1.2;margin:7px 0 9px}h2{font-size:21px;margin:0 0 15px}h3{margin:0 0 10px;font-size:16px}.subtitle{margin:0;color:#d4e3e9;font-size:15px}main{max-width:1360px;padding:22px 30px 45px;margin:auto}.intro{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:16px}.small{font-size:13px;color:var(--muted)}.presets{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}.preset{border:1px solid var(--line);background:white;border-radius:12px;padding:13px 16px;text-align:left;color:var(--ink);font-weight:600}.preset span{display:block;color:var(--muted);font-size:12px;font-weight:400;margin-top:4px}.preset:hover{border-color:var(--teal);background:#edf9f7}.columns{display:grid;grid-template-columns:minmax(380px,1.05fr) minmax(380px,1fr);gap:22px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:24px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}label.field{display:block;font-size:13px;font-weight:600;color:#405266}select{display:block;width:100%;margin-top:6px;background:white;border:1px solid #bfcfd6;border-radius:7px;color:var(--ink);padding:9px 10px;min-height:42px}.wide{grid-column:1/-1}.checks{display:flex;flex-wrap:wrap;gap:14px;margin-top:16px;font-size:14px}.checks label{display:flex;gap:7px;align-items:center}input[type=checkbox]{width:17px;height:17px}.primary{border:0;border-radius:9px;background:var(--teal);color:white;font-weight:600;padding:12px 22px}.evaluate{width:100%;margin-top:19px}.secondary{border:1px solid #b8ccd5;border-radius:8px;background:white;color:var(--ink);padding:9px 14px}.secondary:hover{background:#f1f6f8}.emergency{background:#fff9ed;border:1px solid #edddb4;padding:15px;border-radius:9px;margin-top:16px}.emergency label{font-size:13px}.result{border-left:5px solid #a9bcc6;background:#f6f9fa;border-radius:9px;padding:23px 22px;margin-bottom:18px}.result.permit{border-color:#178960;background:#edf8f3}.result.deny{border-color:#bc4050;background:#fff2f3}.result.mfa{border-color:#ac7a08;background:#fff8e8}.decision{font-size:29px;font-weight:700;line-height:1.2;margin:7px 0 12px}.reason{margin:0}.result-meta{font-size:12px;margin:13px 0 0;color:#536777}.record{border:1px solid #cce5dd;background:#f7fcfa;padding:16px;border-radius:9px;margin-top:18px}.record p{margin:6px 0;font-size:14px}.flow{display:flex;flex-wrap:wrap;gap:7px;margin-top:19px}.flow span{font-size:12px;background:#e9f0f4;border-radius:6px;padding:6px 9px}.audit{margin-top:22px}.audit-head{display:flex;justify-content:space-between;align-items:center;gap:20px}.table-wrap{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;margin-top:15px}table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line)}th{background:#f0f5f7;position:sticky;top:0}td.long{white-space:normal;min-width:220px}.empty{padding:25px;text-align:center;color:var(--muted)}details{margin-top:19px}summary{cursor:pointer;font-weight:600;font-size:14px}details p,details li{font-size:14px}.guidance{direction:rtl;text-align:right;background:#f5f4ef;border:1px solid #e4e1d5;border-radius:10px;padding:17px;margin-top:15px;line-height:1.9}.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.test-output{white-space:pre-wrap;font-size:13px;max-height:200px;overflow:auto;background:#f4f7f8;padding:13px;border-radius:8px}footer{margin-top:18px;color:var(--muted);font-size:12px}[hidden]{display:none!important}
+@media(max-width:900px){.columns{grid-template-columns:1fr}.presets{grid-template-columns:1fr 1fr}header{padding:22px}main{padding:18px}header .top,.intro,.audit-head{align-items:flex-start;flex-direction:column}}@media(max-width:480px){.fields,.presets{grid-template-columns:1fr}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><div class="tag" style="display:inline-block">INITIAL SYSTEM DEMONSTRATION</div><h1>EHR Access Control Framework</h1><p class="subtitle">Taghreed Y. Almirabi · MSIT 5910-01 · University of the People</p></div><div class="tag">SIMULATION · SYNTHETIC DATA</div></div></header>
+<main>
+<div class="intro"><div><strong>Load a scenario, change the inputs, then evaluate the request.</strong><div class="small">Role and context → policy decision → synthetic record and audit evidence</div></div><label class="small"><input type="checkbox" id="arabic-help"> Show Arabic guidance</label></div>
+<div class="presets">
+<button class="preset" data-scenario="permit">1 · Role &amp; context<span>Assigned physician → clinical record</span></button>
+<button class="preset" data-scenario="deny">2 · Prohibited role<span>Laboratory technician → clinical notes</span></button>
+<button class="preset" data-scenario="mfa">3 · Step-up MFA<span>Remote physician → stronger authentication</span></button>
+<button class="preset" data-scenario="emergency">4 · Emergency access<span>Unassigned physician → controlled exception</span></button>
+</div>
+<div id="guidance" class="guidance" hidden><strong>طريقة التجربة:</strong> اختاري سيناريو من الأزرار الأربعة، ثم اضغطي Evaluate request. الأول يسمح للطبيب، والثاني يرفض الطلب غير المسموح لفني المختبر. الثالث يطلب تحققًا إضافيًا؛ اضغطي بعدها Simulate successful MFA لإكمال المحاكاة. في الرابع اختاري سبب الطوارئ، ثم ضعي علامة تأكيد الحاجة السريرية واضغطي Evaluate request. البيانات كلها وهمية، والتحقق متعدد العوامل محاكاة تعليمية.</div>
+<div class="columns">
+<section class="card"><h2>Access request</h2><form id="request-form">
+<div class="fields">
+<label class="field">Workforce role<select id="role">
+<option value="physician">Physician</option><option value="nurse">Nurse</option><option value="pharmacist">Pharmacist</option><option value="laboratory">Laboratory technician</option><option value="him">Health information staff</option><option value="admin">IT administrator</option>
+</select></label>
+<label class="field">Requested action<select id="action">
+<option value="view_clinical">View clinical record</option><option value="add_note">Add clinical note</option><option value="view_medication">View medication record</option><option value="dispense">Dispense medication</option><option value="view_lab">View laboratory results</option><option value="update_lab">Update laboratory result</option><option value="view_demographics">View demographics</option><option value="export_summary">Export record summary</option><option value="manage_account">Manage workforce account</option><option value="view_audit">View audit log</option>
+</select></label>
+<label class="field">Synthetic patient<select id="patient"><option value="P001">P001 · Synthetic Patient A</option><option value="P002">P002 · Synthetic Patient B</option></select></label>
+<label class="field">Account status<select id="status"><option value="active">Active</option><option value="suspended">Suspended</option><option value="departed">Departed employee</option></select></label>
+<label class="field">Patient / task relationship<select id="assigned"><option value="yes">Assigned to this patient / task</option><option value="no">No assignment</option></select></label>
+<label class="field">Department context<select id="department"><option value="yes">Matches assigned work context</option><option value="no">Outside assigned work context</option></select></label>
+<label class="field">Network context<select id="network"><option value="internal">Hospital network (synthetic)</option><option value="remote">Remote network (synthetic)</option></select></label>
+<label class="field">Work period<select id="shift"><option value="yes">Within assigned shift</option><option value="no">Outside assigned shift</option></select></label>
+</div>
+<div class="checks"><label><input id="authenticated" type="checkbox" checked>Already authenticated</label><label><input id="emergency" type="checkbox">Request emergency exception</label></div>
+<div id="emergency-fields" class="emergency" hidden>
+<label class="field">Clinical justification<select id="justification"><option value="">Choose a reason</option><option value="acute_deterioration">Acute clinical deterioration</option><option value="resuscitation">Emergency resuscitation</option><option value="urgent_treatment">Urgent treatment with unavailable assignment</option></select></label>
+<div class="checks"><label><input type="checkbox" id="attested">I confirm an immediate clinical need</label></div>
+<div class="small" style="margin-top:9px">Eligible clinicians only · One patient · Clinical view / note only · 15-minute simulated grant</div>
+</div>
+<button type="submit" class="primary evaluate">Evaluate request</button>
+<p class="small" id="request-state">Scenario 1 is loaded. Evaluate to see the decision.</p>
+</form></section>
+<section class="card"><h2>Decision &amp; evidence</h2>
+<div id="result" class="result" aria-live="polite"><div class="small">POLICY DECISION</div><div class="decision" id="decision">Ready to evaluate</div><p class="reason" id="reason">No access decision has been made yet.</p><p class="result-meta" id="result-meta"></p></div>
+<div id="mfa-panel" hidden><button class="primary" id="complete-mfa">Simulate successful MFA</button><p class="small">Demonstrates step-up policy logic. No actual OTP, phone message, or identity provider is used.</p></div>
+<div id="record" class="record" hidden><h3>Authorized synthetic resource</h3><div id="record-content"></div></div>
+<div id="grant-panel" hidden><div class="buttons"><button class="secondary" id="expire-grant">Advance 15 simulated minutes</button></div><p class="small">Demonstrates expiration of the temporary grant.</p></div>
+<div class="flow"><span>1 · Identity status</span><span>2 · Role &amp; context</span><span>3 · MFA / emergency</span><span>4 · Decision &amp; audit</span></div>
+<details><summary>Environment and architecture</summary><p>This initial prototype uses one local HTML file, plain JavaScript, and embedded synthetic JSON data. A browser runs the code. No framework, package installation, database connection, or live EHR is required.</p><p>The interface collects the request. A separate policy function checks identity, role, context, risk, and emergency conditions. The result drives the resource display, and an audit function records the event.</p><p>Browser-side enforcement, authentication, alerts, and account states are educational simulations. Production server-side controls, real MFA, and tamper-resistant audit storage are outside this initial demonstration.</p></details>
+<details><summary>Run synthetic acceptance tests</summary><p>36 role tests across six roles, plus 6 emergency tests. These compare expected and actual decisions; they do not measure hospital performance or certify compliance.</p><button class="secondary" id="run-tests">Run 42 tests</button><pre id="test-results" class="test-output" hidden></pre></details>
+</section>
+</div>
+<section class="card audit"><div class="audit-head"><div><h2 style="margin-bottom:4px">Session audit log <span class="small">(simulation)</span></h2><div class="small">Events stay in this browser tab until cleared or reloaded. Export saves the current synthetic evidence.</div></div><div class="buttons" style="margin:0"><button class="secondary" id="export-audit">Export audit JSON</button><button class="secondary" id="clear-audit">Clear session log</button></div></div><div class="table-wrap"><table><thead><tr><th>Time</th><th>User / role</th><th>Patient</th><th>Action</th><th>Decision</th><th>Reason / review</th></tr></thead><tbody id="audit-body"><tr><td colspan="6" class="empty">Evaluate a request to create an audit event.</td></tr></tbody></table></div></section>
+<footer>Academic initial prototype · All identities and records are fictional · No connection to a hospital system · Rules are demonstration policies, not an approved clinical access policy.</footer>
+</main>
+<!-- Embedded JSON is synthetic input data, not a live patient database. -->
+<script id="synthetic-data" type="application/json">
+{
+  "patients": {
+    "P001": {"name":"Synthetic Patient A","clinical":"Fictional observation: stable recovery; review planned.","medication":"Fictional medication order MED-001; not a clinical instruction.","laboratory":"Synthetic result LAB-001: recorded for demonstration."},
+    "P002": {"name":"Synthetic Patient B","clinical":"Fictional urgent-care scenario; immediate review requested.","medication":"Fictional medication order MED-002; not a clinical instruction.","laboratory":"Synthetic result LAB-002: recorded for demonstration."}
+  },
+  "users": {"physician":"U001","nurse":"U002","pharmacist":"U003","laboratory":"U004","him":"U005","admin":"U006"}
+}
+</script>
+<script>
+'use strict';
+// MODULE 1: role permissions and a pure policy decision function.
+const ROLES = {
+  physician:{label:'Physician',actions:['view_clinical','add_note','export_summary']},
+  nurse:{label:'Nurse',actions:['view_clinical','add_note']},
+  pharmacist:{label:'Pharmacist',actions:['view_medication','dispense']},
+  laboratory:{label:'Laboratory technician',actions:['view_lab','update_lab']},
+  him:{label:'Health information staff',actions:['view_demographics','export_summary']},
+  admin:{label:'IT administrator',actions:['manage_account','view_audit']}
+};
+const CLINICAL_ACTIONS = ['view_clinical','add_note'];
+const ADMIN_ACTIONS = ['manage_account','view_audit'];
+const REASONS = ['acute_deterioration','resuscitation','urgent_treatment'];
+const verdict = function(decision,code,reason,extra){return Object.assign({decision:decision,code:code,reason:reason},extra||{});};
+function evaluatePolicy(request){
+  if(!ROLES[request.role]) return verdict('DENY','UNKNOWN_ROLE','Unknown workforce role.');
+  if(request.status!=='active') return verdict('DENY','INACTIVE_ACCOUNT','The account is suspended or the employee has departed.');
+  if(!request.authenticated) return verdict('DENY','AUTHENTICATION_REQUIRED','The user must first be authenticated.');
+  if(!ADMIN_ACTIONS.includes(request.action)&&!['P001','P002'].includes(request.patient)) return verdict('DENY','UNKNOWN_PATIENT','Choose a known synthetic patient.');
+  if(request.emergency){
+    if(!['physician','nurse'].includes(request.role)) return verdict('DENY','EMERGENCY_ROLE','This demonstration permits emergency exceptions only for physicians and nurses.');
+    if(!CLINICAL_ACTIONS.includes(request.action)) return verdict('DENY','EMERGENCY_SCOPE','Emergency access is limited to clinical view or note actions for one patient.');
+    if(!REASONS.includes(request.justification)) return verdict('DENY','JUSTIFICATION_REQUIRED','Select a structured clinical justification.');
+    if(!request.attested) return verdict('DENY','ATTESTATION_REQUIRED','Confirm the immediate clinical need.');
+  }else{
+    if(!ROLES[request.role].actions.includes(request.action)) return verdict('DENY','ROLE_NOT_PERMITTED','This action is outside the permissions of the selected role.');
+    if(!request.onShift) return verdict('DENY','SHIFT_CONTEXT','The request is outside the assigned work period.');
+    if(!ADMIN_ACTIONS.includes(request.action)&&(!request.assigned||!request.departmentMatches)) return verdict('DENY','PATIENT_CONTEXT','A patient / task assignment and matching department context are required.');
+  }
+  const highRisk = request.network==='remote'||request.action==='export_summary'||request.action==='manage_account';
+  if(highRisk&&!request.mfaVerified) return verdict('MFA REQUIRED','STEP_UP_REQUIRED','This remote, export, or privileged request requires stronger authentication before access can continue.');
+  if(request.emergency) return verdict('TEMPORARY PERMIT','EMERGENCY_GRANTED','A patient-specific clinical exception is granted for 15 simulated minutes.',{expiresAt:(request.now||Date.now())+15*60*1000,reviewStatus:'Pending post-event review',alertStatus:'Simulated alert created'});
+  return verdict('PERMIT','ROLE_CONTEXT_ALLOWED','The active, authenticated user has the required role permissions and work context.');
+}
+// MODULE 2: explicit synthetic fixtures, independent expected outcomes.
+function baseRequest(role){
+  return {role:role,status:'active',authenticated:true,patient:'P001',action:ROLES[role].actions[0],assigned:true,departmentMatches:true,network:'internal',onShift:true,emergency:false,justification:'',attested:false,mfaVerified:true,now:1000000};
+}
+function acceptanceFixtures(){
+  const fixtures=[];
+  Object.keys(ROLES).forEach(function(role){
+    const base=baseRequest(role);
+    const prohibited=role==='admin'?'view_clinical':'manage_account';
+    [
+      ['valid role and context',{},'PERMIT','ROLE_CONTEXT_ALLOWED'],
+      ['departed employee',{status:'departed'},'DENY','INACTIVE_ACCOUNT'],
+      ['unauthenticated user',{authenticated:false},'DENY','AUTHENTICATION_REQUIRED'],
+      ['prohibited role action',{action:prohibited},'DENY','ROLE_NOT_PERMITTED'],
+      ['outside shift',{onShift:false},'DENY','SHIFT_CONTEXT'],
+      ['remote step-up',{network:'remote',mfaVerified:false},'MFA REQUIRED','STEP_UP_REQUIRED']
+    ].forEach(function(test){fixtures.push({name:ROLES[role].label+' / '+test[0],request:Object.assign({},base,test[1]),expected:test[2],code:test[3]});});
+  });
+  const emergency=Object.assign(baseRequest('physician'),{emergency:true,patient:'P002',assigned:false,departmentMatches:false,onShift:false,justification:'acute_deterioration',attested:true});
+  [
+    ['valid controlled exception',{},'TEMPORARY PERMIT','EMERGENCY_GRANTED'],
+    ['missing clinical reason',{justification:''},'DENY','JUSTIFICATION_REQUIRED'],
+    ['missing attestation',{attested:false},'DENY','ATTESTATION_REQUIRED'],
+    ['ineligible emergency role',{role:'pharmacist'},'DENY','EMERGENCY_ROLE'],
+    ['export excluded from emergency',{action:'export_summary'},'DENY','EMERGENCY_SCOPE'],
+    ['remote emergency still requires MFA',{network:'remote',mfaVerified:false},'MFA REQUIRED','STEP_UP_REQUIRED']
+  ].forEach(function(test){fixtures.push({name:'Emergency / '+test[0],request:Object.assign({},emergency,test[1]),expected:test[2],code:test[3]});});
+  return fixtures;
+}
+function runAcceptanceTests(){return acceptanceFixtures().map(function(f){const actual=evaluatePolicy(f.request);return {name:f.name,expected:f.expected,actual:actual.decision,passed:actual.decision===f.expected&&actual.code===f.code};});}
+window.demoEngine={evaluatePolicy:evaluatePolicy,runAcceptanceTests:runAcceptanceTests,acceptanceFixtures:acceptanceFixtures};
+// MODULE 3: interface, simulated authentication, and session audit.
+const DATA=JSON.parse(document.getElementById('synthetic-data').textContent);
+const $=function(id){return document.getElementById(id);};
+let mfaVerified=false;
+let audit=[];
+let lastRequest=null;
+let lastResult=null;
+let clockOffset=0;
+function collectRequest(){
+  return {role:$('role').value,status:$('status').value,authenticated:$('authenticated').checked,patient:$('patient').value,action:$('action').value,assigned:$('assigned').value==='yes',departmentMatches:$('department').value==='yes',network:$('network').value,onShift:$('shift').value==='yes',emergency:$('emergency').checked,justification:$('justification').value,attested:$('attested').checked,mfaVerified:mfaVerified,now:Date.now()+clockOffset};
+}
+function addAudit(request,result,eventType){
+  const event={eventId:'EVENT-'+String(audit.length+1).padStart(4,'0'),timestamp:new Date(request.now).toISOString(),userId:DATA.users[request.role],role:request.role,patientId:ADMIN_ACTIONS.includes(request.action)?null:request.patient,action:request.action,accountStatus:request.status,authenticated:request.authenticated,network:request.network,device:'SYNTHETIC-WORKSTATION',assigned:request.assigned,departmentMatches:request.departmentMatches,onShift:request.onShift,mfaVerified:request.mfaVerified,emergency:request.emergency,eventType:eventType||'access_decision',decision:result.decision,reasonCode:result.code,reason:result.reason,clinicalJustification:request.emergency?request.justification:null,expiresAt:result.expiresAt?new Date(result.expiresAt).toISOString():null,alertStatus:result.alertStatus||null,reviewStatus:result.reviewStatus||null};
+  audit.push(event);renderAudit();
+}
+function renderAudit(){
+  const body=$('audit-body');body.replaceChildren();
+  if(!audit.length){const row=document.createElement('tr');const td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent='Evaluate a request to create an audit event.';row.appendChild(td);body.appendChild(row);return;}
+  audit.slice().reverse().forEach(function(event){
+    const row=document.createElement('tr');
+    [event.timestamp.slice(11,19),event.userId+' · '+ROLES[event.role].label,event.patientId||'System',event.action,event.decision,event.reasonCode+(event.reviewStatus?' · '+event.reviewStatus:'')].forEach(function(text,index){const td=document.createElement('td');td.textContent=text;if(index===5)td.className='long';row.appendChild(td);});
+    body.appendChild(row);
+  });
+}
+function renderResource(request,result){
+  const permitted=['PERMIT','TEMPORARY PERMIT'].includes(result.decision);
+  $('record').hidden=!permitted;
+  $('grant-panel').hidden=result.decision!=='TEMPORARY PERMIT';
+  if(!permitted)return;
+  const content=$('record-content');content.replaceChildren();
+  const patient=DATA.patients[request.patient];
+  let lines=[];
+  if(ADMIN_ACTIONS.includes(request.action)) lines=['System resource · Synthetic workforce directory','Requested operation: '+request.action,'Clinical patient records are outside the IT administrator role.'];
+  else{
+    lines=[request.patient+' · '+patient.name];
+    if(CLINICAL_ACTIONS.includes(request.action)) lines.push(patient.clinical);
+    else if(['view_medication','dispense'].includes(request.action)) lines.push(patient.medication);
+    else if(['view_lab','update_lab'].includes(request.action)) lines.push(patient.laboratory);
+    else if(request.action==='view_demographics') lines.push('Fictional identifier and name only; no real personal information.');
+    else lines.push('Synthetic summary resource. Export authorization was evaluated after simulated MFA.');
+    if(['add_note','dispense','update_lab'].includes(request.action)) lines.push('This initial version demonstrates authorization of this operation; it does not persist clinical changes.');
+  }
+  lines.forEach(function(text){const p=document.createElement('p');p.textContent=text;content.appendChild(p);});
+}
+function showResult(request,result){
+  $('decision').textContent=result.decision;$('reason').textContent=result.reason;
+  $('result').className='result '+(result.decision==='DENY'?'deny':result.decision==='MFA REQUIRED'?'mfa':'permit');
+  $('result-meta').textContent='Reason code: '+result.code+(request.mfaVerified?' · Simulated MFA verified':'')+(result.expiresAt?' · Expires '+new Date(result.expiresAt).toISOString().slice(11,19)+' · Simulated alert · Review pending':'');
+  $('mfa-panel').hidden=result.decision!=='MFA REQUIRED';renderResource(request,result);
+}
+function evaluateCurrent(){
+  const request=collectRequest();const result=evaluatePolicy(request);lastRequest=request;lastResult=result;showResult(request,result);addAudit(request,result);
+  $('request-state').textContent='Request evaluated. Change an input to test another context.';
+}
+function resetPending(){
+  mfaVerified=false;lastRequest=null;lastResult=null;$('mfa-panel').hidden=true;$('record').hidden=true;$('grant-panel').hidden=true;
+  $('result').className='result';$('decision').textContent='Ready to evaluate';$('reason').textContent='Inputs changed. Evaluate the new request.';$('result-meta').textContent='';
+  $('emergency-fields').hidden=!$('emergency').checked;$('request-state').textContent='Evaluate the current inputs to generate a new decision.';
+}
+function loadScenario(kind){
+  $('role').value=kind==='deny'?'laboratory':'physician';$('action').value='view_clinical';$('patient').value=kind==='emergency'?'P002':'P001';
+  $('status').value='active';$('assigned').value=kind==='emergency'?'no':'yes';$('department').value='yes';$('network').value=kind==='mfa'?'remote':'internal';$('shift').value='yes';
+  $('authenticated').checked=true;$('emergency').checked=kind==='emergency';$('justification').value='';$('attested').checked=false;resetPending();
+  $('request-state').textContent='Scenario loaded. Review the inputs, then evaluate.';
+}
+$('request-form').addEventListener('submit',function(event){event.preventDefault();evaluateCurrent();});
+$('request-form').addEventListener('change',resetPending);
+document.querySelectorAll('[data-scenario]').forEach(function(button){button.addEventListener('click',function(){loadScenario(button.dataset.scenario);});});
+$('complete-mfa').addEventListener('click',function(){
+  if(!lastResult||lastResult.decision!=='MFA REQUIRED')return;
+  mfaVerified=true;const request=collectRequest();addAudit(request,verdict('MFA SIMULATED','MFA_SIMULATION_COMPLETED','Successful second factor simulated; no real identity verification performed.'),'authentication_simulation');evaluateCurrent();
+});
+$('expire-grant').addEventListener('click',function(){
+  if(!lastResult||lastResult.decision!=='TEMPORARY PERMIT')return;
+  clockOffset+=15*60*1000;
+  const request=collectRequest();
+  if(request.now>=lastResult.expiresAt){const result=verdict('DENY','GRANT_EXPIRED','The temporary emergency grant has expired. A fresh justified request is required.');lastResult=result;showResult(request,result);addAudit(request,result,'grant_expiration');}
+});
+$('run-tests').addEventListener('click',function(){
+  const results=runAcceptanceTests();const count=results.filter(function(t){return t.passed;}).length;$('test-results').hidden=false;$('test-results').textContent=count+' / '+results.length+' tests passed\n\n'+results.map(function(t){return (t.passed?'PASS':'FAIL')+' · '+t.name+' → '+t.actual;}).join('\n');
+});
+$('export-audit').addEventListener('click',function(){
+  const exportData={prototype:'EHR access-control policy simulation',syntheticDataOnly:true,generatedAt:new Date().toISOString(),events:audit};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(exportData,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='synthetic-audit-log.json';a.click();setTimeout(function(){URL.revokeObjectURL(url);},1000);
+});
+$('clear-audit').addEventListener('click',function(){audit=[];renderAudit();});
+$('arabic-help').addEventListener('change',function(){$('guidance').hidden=!this.checked;});
+loadScenario('permit');
+</script>
+</body>
+</html>
